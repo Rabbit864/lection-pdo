@@ -1,0 +1,844 @@
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reset.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/theme/simple.min.css"
+      id="theme"
+    />
+    <link rel="stylesheet" href="highlight-phpstorm-light-theme.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Roboto+Mono&family=Roboto:wght@400;700&display=swap"
+    />
+    <style>
+      :root {
+        --r-main-font: 'Roboto', 'Noto Color Emoji', sans-serif;
+        --r-heading-font: 'Roboto', 'Noto Color Emoji', sans-serif;
+        --r-code-font: 'Roboto Mono', 'Noto Color Emoji', monospace;
+        --r-block-margin: 10px;
+      }
+      .reveal pre {
+        font-size: 0.5em;
+      }
+      .nohighlight {
+        padding: 1em !important;
+      }
+      .reveal .hljs {
+        min-height: auto;
+      }
+      td.hljs-ln-code {
+        white-space: pre;
+      }
+      .reveal h1,
+      .reveal h2,
+      .reveal h3,
+      .reveal h4,
+      .reveal h5,
+      .reveal h6,
+      .reveal pre,
+      .reveal p,
+      .reveal img {
+        margin: 0 var(--r-block-margin) calc(var(--r-block-margin) * 2);
+      }
+      .reveal pre {
+        width: auto;
+      }
+
+      .reveal .r-stack > * {
+        margin: 0;
+      }
+      .horizontal {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+      }
+      .horizontal > * {
+        flex-grow: 1;
+      }
+      .horizontal-half > * {
+        flex-grow: 0 !important;
+        width: calc(50% - var(--r-block-margin) * 2) !important;
+      }
+
+      ul {
+        font-size: 30px;
+      }
+
+      p {
+        font-size: 30px;
+      }
+    </style>
+    <title>Исключения</title>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h2>PDO в PHP</h2>
+        </section>
+
+        <section>
+          <h3>Определение PDO</h3>
+          <p>
+            Расширение PHP Data Objects (PDO) определяет легкий и согласованный
+            интерфейс для доступа к базам данных в PHP. Каждый драйвер базы
+            данных, реализующий интерфейс PDO, может предоставлять функции,
+            специфичные для базы данных, как обычные функции расширения.
+            Обратите внимание, что вы не можете выполнять какие-либо функции
+            базы данных, используя расширение PDO само по себе; вы должны
+            использовать специфичный для базы данных драйвер PDO для доступа к
+            серверу базы данных
+          </p>
+        </section>
+
+        <section>
+          <h3>Уточнения</h3>
+          <p>
+            PDO предоставляет уровень абстракции доступа к данным , что
+            означает, что независимо от того, какую базу данных вы используете,
+            вы используете одни и те же функции для выдачи запросов и извлечения
+            данных. PDO не предоставляет уровень абстракции базы данных ; он не
+            переписывает SQL и не эмулирует отсутствующие функции. Вам следует
+            использовать полноценный уровень абстракции, если вам нужна эта
+            возможность.
+          </p>
+        </section>
+
+        <section>
+          <h3>Соединение</h3>
+          <p>
+            Для соединения с базой данных PDO использует dsn(Data Source Name)
+          </p>
+        </section>
+
+        <section>
+          <h3>Пример соединения</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $host = '127.0.0.1';
+              $db = 'test';
+              $user = 'root';
+              $pass = '';
+              $charset = 'utf8';
+
+              $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+              $opt = [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+              ];
+              $pdo = new PDO($dsn, $user, $pass, $opt);           
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Пояснения</h3>
+          <p>
+            В $dsn задается тип БД, с которым будем работать (mysql), хост, имя
+            базы данных и чарсет
+          </p>
+          <p>затем идут имя пользователя и пароль</p>
+          <p>после которого задается массив опций</p>
+        </section>
+
+        <section>
+          <h3>Обработка исключения</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              try {
+                $dbh = new PDO('mysql:host=localhost;dbname=test', $user, $pass);
+              } catch (PDOException $e) {
+                  // attempt to retry the connection after some timeout for example
+              }
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Стандратный select запрос</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $stmt = $pdo->query('SELECT name FROM users');
+              while ($row = $stmt->fetch())
+              {
+                echo $row['name'] . "\n";
+              }
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Подготовленные запросы</h3>
+          <p>
+            Если же в запрос передаётся хотя бы одна переменная, то этот запрос
+            в обязательном порядке должен выполняться только через
+            подготовленные выражения. Подготовленные выражения можно описать,
+            как некий вид скомпилированного шаблона SQL запроса, который будет
+            запускаться приложением и настраиваться с помощью входных
+            параметров.
+          </p>
+        </section>
+
+        <section>
+          <h3>Преимущества подгтовленных запросов</h3>
+          <ul style="font-size: 30px">
+            <li>
+              Запрос необходимо однажды подготовить и затем его можно запускать
+              столько раз, сколько нужно, причём как с теми же, так и с
+              отличающимися параметрами. Когда запрос подготовлен, СУБД
+              анализирует его, компилирует и оптимизирует план его выполнения.
+            </li>
+            <li>
+              Параметры подготовленного запроса не требуется экранировать
+              кавычками; драйвер это делает автоматически. Если в приложении
+              используются исключительно подготовленные запросы, разработчик
+              может быть уверен, что никаких SQL-инъекций случиться не может
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>Пример SQL-инъекций</h3>
+          <pre>
+            <code>$sql = "SELECT * FROM Users WHERE UserId = " + $userId;</code>
+          </pre>
+          <p>
+            Если пользователь подставит в userId = 105 OR 1=1, то данный sql
+            запрос вернёт всех пользователей
+          </p>
+          <p>
+            Для того чтобы SQL-инъекций не произошло всегда используйте
+            подготовленные выражения
+          </p>
+        </section>
+
+        <section>
+          <h3>Плейсхолдер</h3>
+          <p>
+            Внутрь подготовленного выражения ставится специальный маркер -
+            плейсхолдер
+          </p>
+          <p>
+            PDO поддерживает позиционные плейсхолдеры (?), для которых важен
+            порядок передаваемых переменных, и именованные (:name), для которых
+            порядок не важен.
+          </p>
+        </section>
+
+        <section>
+          <h3>Примеры подготовленных выражений</h3>
+          <pre>
+            <code>
+              $sql = 'SELECT name FROM users WHERE email = ?';
+              $sql = 'SELECT name FROM users WHERE email = :email';
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Выполениние подготовленных запросов в PDO</h3>
+          <p>
+            Чтобы выполнить такой запрос, сначала его надо подготовить с помощью
+            функции prepare(). Она также возвращает PDO statement, но ещё без
+            данных. Чтобы их получить, надо исполнить этот запрос,
+            предварительно передав в него переменные.
+          </p>
+        </section>
+
+        <section>
+          <h3>Выполнение подготовленных запросов в PDO</h3>
+          <p>
+            Передать переменные можно 2 способами. Первый из них с помощью
+            функции execute(), передав ему массив с переменными
+          </p>
+        </section>
+
+        <section>
+          <h3>Пример подготовленных запросов в PDO</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $stmt = $pdo->prepare('SELECT name FROM users WHERE email = ?');
+              $stmt->execute([$email]);
+
+              $stmt = $pdo->prepare('SELECT name FROM users WHERE email = :email');
+              $stmt->execute(['email' => $email]);
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Пример подготовленных запросов в PDO</h3>
+          <p>Второй способ через функцию bindValue</p>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $calories = 150;
+              $colour = 'red';
+              $sth = $dbh->prepare('SELECT name, colour, calories
+                FROM fruit
+                WHERE calories < :calories AND colour = :colour');
+
+              $sth->bindValue('calories', $calories, PDO::PARAM_INT);
+              $sth->bindValue('colour', $colour, PDO::PARAM_STR);
+              $sth->execute();
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <a href="https://www.php.net/manual/en/pdo.constants.php"
+            >Список типов параметров в PDO</a
+          >
+        </section>
+
+        <section>
+          <h3>Ещё пример подготволенного выражения с перебором строк</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $stmt = $pdo->prepare('SELECT name FROM users WHERE email = ?');
+              $stmt->execute([$_GET['email']]);
+              foreach ($stmt as $row)
+              {
+                echo $row['name'] . "\n";
+              }
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Пример вставки</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $stmt = $pdo->prepare("INSERT INTO myTable (name, age) VALUES (?, ?)");
+              $stmt->execute(['Пётр', 29]);
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Пример Обновления</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $stmt = $pdo->prepare("UPDATE myTable SET name = ? WHERE id = ?")
+              ->execute(['Максим', 115]);
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Пример удаления</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $stmt = $pdo->prepare("DELETE FROM myTable WHERE id = ?");
+              $stmt->execute([115]);
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>fetch и fetchAll в PDO</h3>
+          <p>
+            Чтобы извлечь результаты в PDO, у вас есть возможность
+            $stmt->fetch()или $stmt->fetchAll(). Первый вариант более
+            универсален, так как его можно использовать для извлечения одной
+            строки или всех, если использовать его в цикле. Последний вариант по
+            сути является синтаксическим сахаром, так как он позволяет извлечь
+            весь ваш набор результатов в массиве с помощью этой одной команды.
+          </p>
+        </section>
+
+        <section>
+          <h3>Пример fetch</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $stmt = $pdo->prepare('SELECT name FROM users WHERE email = ?');
+              $stmt->execute([$_GET['email']]);
+              while ($row = $stmt->fetch())
+              {
+                echo $row[0] . "\n";
+                echo $row['name'] . "\n";
+                echo $row->name . "\n";
+              }
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Пример fetchAll</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $data = $pdo->query('SELECT id, name FROM users')->fetchAll(PDO::FETCH_KEY_PAIR);
+              array (
+                  104 => 'John',
+                  110 => 'Mike',
+                  120 => 'Mary',
+                  121 => 'Kathy',
+              )
+            </code>
+        </pre>
+        </section>
+
+        <section>
+          <h3>Режимы выборки</h3>
+          <p>
+            В каком виде вы получите данные зависит от режима выборки который
+            пердается первым аргументов в fetch и fetchAll
+          </p>
+          <p>Для объединения нескольких режимов используется оператор |</p>
+        </section>
+
+        <section>
+          <h3>Режимы выборки для fetch и fetchAll</h3>
+          <ul>
+            <li>PDO::FETCH_NUM- Извлечь числовой массив</li>
+            <li>PDO::FETCH_ASSOC- Извлечь ассоциативный массив</li>
+            <li>
+              PDO::FETCH_COLUMN- Извлечь только один столбец. Скалярный для
+              fetch(); одномерный массив для fetchAll(). Если fetch(), то вместо
+              этого можно использовать fetchColumn() синтаксический сахар
+            </li>
+            <li>
+              PDO::FETCH_CLASS | PDO::FETCH_CLASSTYPE- Извлекает объект с именем
+              класса в соответствии со значением базы данных. Если класс не
+              существует, по умолчанию будет stdClass
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>Режимы выборки только для fetch</h3>
+          <ul style="font-size: 25px">
+            <li>
+              PDO::FETCH_OBJ- Извлечь как универсальный объект stdClass. Вместо
+              этого рекомендуется использовать fetchObject()синтаксический
+              сахар, так как он позволяет извлечь анонимный и указанный класс.
+              Вы все еще можете использовать PDO::FETCH_CLASS, но вы должны
+              установить его с setFetchMode(PDO::FETCH_CLASS, 'MyClass'), за
+              которым следует fetch(). Может использоваться с fetchAll(), но не
+              рекомендуется, так как он менее универсален
+            </li>
+            <li>
+              PDO::FETCH_LAZY- Извлекает ссылку PDORow , которая может быть
+              объектом, ассоциативным или числовым массивом. Эффективно
+              использует память, так как строго извлекает результаты при вызове
+              объектного, ассоциативного или числового индекса
+            </li>
+            <li>
+              PDO::FETCH_INTO- Извлечь в существующий класс. Необходимо
+              использовать setFetchMode(PDO::FETCH_INTO, $myClass), за которым
+              следуетfetch()
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>Режимы выборки только для fetchAll</h3>
+          <ul style="font-size: 25px">
+            <li>
+              PDO::FETCH_CLASS- Извлечь либо как универсальный объект stdClass,
+              либо в существующий класс, если указано; то же самое, что
+              использовать PDO::FETCH_OBJанонимный объект, поэтому имеет смысл
+              использовать его, так как он более гибок. Может использоваться
+              fetch()также с , но не является предпочтительным.
+            </li>
+            <li>
+              PDO::FETCH_KEY_PAIR- Извлечь пару ключ/значение, где первый
+              столбец является уникальным ключом, а второй — единственным
+              значением.
+            </li>
+            <li>
+              PDO::FETCH_UNIQUE- То же, что и PDO::FETCH_KEY_PAIR, только часть
+              значения представляет собой массив
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>Режимы выборки только для fetchAll</h3>
+          <ul style="font-size: 25px">
+            <li>
+              PDO::FETCH_GROUP- Извлечь данные по общему имени столбца и
+              сгруппировать все строки по этому ключу в виде массива
+              ассоциативных массивов.
+            </li>
+            <li>
+              PDO::FETCH_GROUP | PDO::FETCH_COLUMN- То же самое
+              PDO::FETCH_GROUP, что и , только часть значения представляет собой
+              массив одномерных числовых массивов.
+            </li>
+            <li>
+              PDO::FETCH_GROUP | PDO::FETCH_CLASS- То же, что и
+              PDO::FETCH_GROUP, но вместо этого используется массив массивов
+              объектов
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>Извлечение в ассоциативный массив</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $arr = [];
+              $stmt = $pdo->prepare("SELECT * FROM myTable WHERE id <= ?");
+              $stmt->execute([5]);
+              while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $arr[] = $row;
+              }
+              var_export($arr);
+              /** 
+              [
+                ['name' => 'Jerry', 'age' => 14, 'weight' => 129], 
+                ['name' => 'Alexa', 'age' => 22, 'weight' => 108]
+              ]
+              */
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Извлечение в числовой массив</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $stmt = $pdo->prepare("SELECT first_name, squat, bench_press FROM myTable WHERE weight > ?");
+              $stmt->execute([200]);
+              $arr = $stmt->fetchAll(PDO::FETCH_NUM);
+              var_export($arr);
+
+              /**
+              [
+                ['Thad', 305, 250], 
+                ['Larry', 225, 180]
+              ]
+              */
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Извлечение в массив объектов</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $stmt = $pdo->prepare("SELECT name, age, weight FROM myTable WHERE id > ?");
+              $stmt->execute([12]);
+              $arr = $stmt->fetchAll(PDO::FETCH_CLASS);
+              var_export($arr);
+
+              /**
+              [
+                stdClass Object ['name' => 'Jerry', 'age' => 14, 'weight' => 129], 
+                stdClass Object ['name' => 'Alexa', 'age' => 22, 'weight' => 108]
+              ]
+              */
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Извлечение в массив существующих классов</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              class myClass {}
+              $stmt = $pdo->prepare("SELECT name, age, weight FROM myTable WHERE id > ?");
+              $stmt->execute([12]);
+              $arr = $stmt->fetchAll(PDO::FETCH_CLASS, 'myClass');
+              var_export($arr);
+
+              /**
+              [
+                myClass Object ['name' => 'Jerry', 'age' => 14, 'weight' => 129], 
+                myClass Object ['name' => 'Alexa', 'age' => 22, 'weight' => 108]
+              ]
+              */
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Извлечение в массив существующих классов</h3>
+          <p>
+            Имейте в виду, что это имеет непредсказуемое поведение внедрения
+            значения свойства до его установки в конструкторе (если он у вас
+            есть). Это означает, что если вы уже использовали одно из имен
+            переменных в конструкторе, то значение выборки будет перезаписано
+            значением по умолчанию. Чтобы гарантировать назначение значений
+            после вызова конструктора, вы должны сделать
+            fetchAll(PDO::FETCH_CLASS | PDO::FETCH_PROPS_LATE, 'myClass')
+          </p>
+        </section>
+
+        <section>
+          <h3>Извлечение скалярного значения</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $stmt = $pdo->prepare("SELECT COUNT(*) FROM myTable WHERE weight < ?");
+              $stmt->execute([185]);
+              $count = $stmt->fetch(PDO::FETCH_COLUMN);
+              //Синтаксический сахар для строки выше: $count = $stmt->fetchColumn();
+              echo $count; //Output: 1784
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Извлечение одного столбца как переменную массива</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $stmt = $pdo->prepare("SELECT height FROM myTable WHERE id < ?");
+              $stmt->execute([500]);
+              $heights = $stmt->fetchAll(PDO::FETCH_COLUMN);
+              var_export($heights);
+
+              /**
+                [78, 64, 68, 54, 58]
+              */
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Извлечение пару ключ/значение</h3>
+          <p>
+            Это создает ассоциативный массив с форматом первого столбца в
+            качестве ключа и второго столбца в качестве значения. Поэтому ваш
+            первый столбец должен быть уникальным значением.
+          </p>
+        </section>
+
+        <section>
+          <h3>Извлечение пару ключ/значение</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $stmt = $pdo->prepare("SELECT id, name FROM myTable WHERE age < ?");
+              $stmt->execute([25]);
+              $arr = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+              var_export($arr);
+
+              /** 
+              [7 => 'Jerry', 10 => 'Bill', 29 => 'Bobby']
+              */
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Извлечение массив пар ключ/значение</h3>
+          <p>
+            ключом будет ваш первый столбец, который должен быть уникальным
+            значением, в то время как значением будут остальные столбцы как
+            ассоциативный массив
+          </p>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $stmt = $pdo->prepare("SELECT id, max_bench, max_squat FROM myTable WHERE weight < ?");
+              $stmt->execute([225]);
+              $arr = $stmt->fetchAll(PDO::FETCH_UNIQUE);
+              var_export($arr);
+
+              /** 
+              [
+                17 => ['max_bench' => 230, 'max_squat' => 175],
+                84 => ['max_bench' => 195, 'max_squat' => 235],
+                136 => ['max_bench' => 135, 'max_squat' => 285]
+              ]
+              */
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Извлечение в группах</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $stmt = $pdo->prepare("SELECT eye_color, name, weight FROM myTable WHERE age < ?");
+              $stmt->execute([35]);
+              $arr = $stmt->fetchAll(PDO::FETCH_GROUP);
+              var_export($arr);
+
+              /**
+              [
+                'green' => [
+                  ['name' => 'Patrick', 'weight' => 178],
+                  ['name' => 'Olivia', 'weight' => 132]
+                ],
+                'blue' => [
+                  ['name' => 'Kyle', 'weight' => 128],
+                  ['name' => 'Ricky', 'weight' => 143]
+                ],
+                'brown' => [
+                  ['name' => 'Jordan', 'weight' => 173],
+                  ['name' => 'Eric', 'weight' => 198]
+                ]
+              ]
+              */
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Извлечение в существующий класс</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              class myClass {
+                public $max_bench;
+                public $max_squat;
+              }
+              
+              $myClass = new myClass();
+              var_export($myClass);
+              
+              $stmt = $pdo->prepare("SELECT max_bench, max_squat FROM myTable WHERE weight < ?");
+              $stmt->execute([200]);
+              $stmt->setFetchMode(PDO::FETCH_INTO, $myClass);
+              $arr = $stmt->fetch();
+              var_export($arr); //$arr === $myClass
+              /**
+              myClass Object ['max_bench' => null, 'max_squat' => null]
+              myClass Object ['max_bench' => 225, 'max_squat' => 95]
+              */
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Оператор Like (Не правильно)</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $stmt = $pdo->prepare("SELECT id, name, age FROM myTable WHERE name LIKE %?%"); 
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Оператор Like (Правильно)</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $search = "%Пётр%";
+              $stmt = $pdo->prepare("SELECT id, name, age FROM myTable WHERE name LIKE ?");
+              $stmt->execute([$search]);
+              $arr = $stmt->fetchAll();
+              var_export($arr);
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Оператор In</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $inArr = [1, 3, 5];
+              $clause = implode(',', array_fill(0, count($inArr), '?')); // создаёт три placeholder-а
+              $stmt = $pdo->prepare("SELECT * FROM myTable WHERE id IN ($clause)");
+              $stmt->execute($inArr);
+              $resArr = $stmt->fetchAll();
+              var_export($resArr);
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Оператор In с нескольками</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $inArr = [1, 3, 5];
+              $clause = implode(',', array_fill(0, count($inArr), '?')); //create 3 question marks
+              $fullArr = array_merge($inArr, [5]); //merge WHERE IN array with other value(s)
+              $stmt = $pdo->prepare("SELECT * FROM myTable WHERE id IN ($clause) AND id < ?");
+              $stmt->execute($fullArr);
+              $resArr = $stmt->fetchAll();
+              var_export($resArr);
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Проблема с операторорм LIMIT</h3>
+          <p>
+            Когда PDO работает в режиме эмуляции, все данные, которые были
+            переданы напрямую в execute(), форматируются как строки. То есть,
+            эскейпятся и обрамляются кавычками. Поэтому LIMIT ?,? превращается в
+            LIMIT '10', '10' и очевидным образом вызывает ошибку синтаксиса.
+          </p>
+        </section>
+
+        <section>
+          <h3>Проблема с операторорм LIMIT</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              $stm = $pdo->prepare('SELECT * FROM table LIMIT ?, ?');
+              $stm->bindValue(1, $limit_from, PDO::PARAM_INT);
+              $stm->bindValue(2, $per_page, PDO::PARAM_INT);
+              $stm->execute();
+              $data = $stm->fetchAll();
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Транзакции в SQL</h3>
+          <p>
+            Транзакцией называется атомарная группа запросов SQL, т. е. запросы,
+            которые рассматриваются как единое целое. Если база данных может
+            выполнить всю группу запросов, она делает это, но если любой из них
+            не может быть выполнен в результате сбоя или по какой-то другой
+            причине, не будет выполнен ни один запрос группы. Все или ничего.
+          </p>
+        </section>
+
+        <section>
+          <h3>Транзакции в SQL</h3>
+          <pre>
+            <code>
+              START TRANSACTION;
+              SELECT total FROM accounts WHERE user_id = 2;
+              UPDATE accounts SET total = total - 3000 WHERE user_id = 2;
+              UPDATE accounts SET total = total + 3000 WHERE user_id IS NULL;
+              COMMIT;
+            </code>
+          </pre>
+        </section>
+
+        <section>
+          <h3>Пример транзакций в PDO</h3>
+          <pre>
+            <code class="language-php" data-trim data-line-numbers="">
+              try {
+                $pdo->beginTransaction();
+                $stmt1 = $pdo->prepare("INSERT INTO myTable (name, state) VALUES (?, ?)");
+                $stmt2 = $pdo->prepare("UPDATE myTable SET age = ? WHERE id = ?");
+                if(!$stmt1->execute(['Rick', 'NY'])) throw new Exception('Stmt 1 Failed');
+                if(!$stmt2->execute([27, 139])) throw new Exception('Stmt 2 Failed');
+                $pdo->commit();
+              } catch(Exception $e) {
+                $pdo->rollback();
+                throw $e;
+              }
+            </code>
+          </pre>
+        </section>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/reveal.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.0.4/plugin/highlight/highlight.min.js"></script>
+    <script>
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        plugins: [RevealHighlight],
+        slideNumber: true,
+        autoAnimate: true,
+      });
+    </script>
+  </body>
+</html>
